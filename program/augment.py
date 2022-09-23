@@ -15,7 +15,8 @@ from sklearn import model_selection
 from tqdm import tqdm
 
 import tensorflow as tf
-from keras.backend import tensorflow_backend
+from keras.backend import *
+# from keras.backend import tensorflow_backend
 
 user_list = ["user_dr_faisal", "user_dr_habib", "user_dr_habiba", "user_dr_nushrat",
 "user_dr_rahman", "user_dr_sajeda", "user_dr_salimul", "user_gn_raisa", "user_hu_nasrin",

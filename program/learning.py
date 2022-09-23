@@ -14,9 +14,12 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 from sklearn import model_selection
 import pickle
-
-from keras.engine.topology import Input
-from keras.layers.wrappers import Bidirectional
+# from tensorflow.keras.layers import Layer, InputSpec
+from tensorflow import *
+from tensorflow import keras
+from keras import *
+# from keras.engine.topology import Input
+# from keras.layers.wrappers import Bidirectional
 from keras.models import Model
 from keras.optimizers import Adam, SGD, RMSprop
 
@@ -28,7 +31,8 @@ import datetime
 import os
 
 import tensorflow as tf
-from keras.backend import tensorflow_backend
+from keras.backend import *
+# from keras.backend import tensorflow_backend
 
 class Learning:
     def __init__(self, data, labels, testX, testY):
