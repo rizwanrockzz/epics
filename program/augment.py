@@ -28,7 +28,7 @@ class Augment:
     def combine(self, remove):
         data = self.dataset
         labels = self.labels
-        # 使いたくないデータを除去して、データとラベルが一緒になったリストを作成する
+        # Remove unwanted data and create a list with data and labels together
         if not remove is None:
             dl = [[data[i], labels[i]] for i in range(len(data)) if not labels[i][0] == -1]
         else:
@@ -52,10 +52,10 @@ class Augment:
         self.testX = []
         self.testY = []
         self.maxlen = 0
-        # label -> None などを避ける
+        # label -> None avoid etc.
         self.combine(remove)
 
-    # testとtrainをわける
+    # Separate test and train
     def split(self, u_list, test_num=3, reduce_samples_flg=None, reduce_samples_num=5):
         trainX = []
         trainY = []
@@ -76,7 +76,7 @@ class Augment:
         self.labels = trainY
         trainX = []
         trainY = []
-        # trainの数を減らしたい時
+        # When you want to reduce the number of trains
         if not reduce_samples_flg is None:
             for u in test_user:
                 u_list.remove(u)
@@ -89,7 +89,7 @@ class Augment:
         self.testY = testY
         del trainX, trainY, testX, testY
 
-# SMOTE用の関数たち
+# Functions for SMOTE
     def padding(self, d):
         xdata = sequence.pad_sequences(d, maxlen=self.maxlen, padding = 'post', dtype=np.float32)
         print("done padding")
@@ -111,9 +111,10 @@ class Augment:
         self.dataset = b
         # return X_res, Y_res
 
-#ここまで
+#So far
 
-    # ストロークを平行移動
+    # Translate Stroke
+
     def genParallel(self, data, label, num):
         print("data augmentation(parallel)")
         a = np.array(data)
@@ -121,7 +122,8 @@ class Augment:
         labels = []
         for j in tqdm(range(num)):
 
-            ###### 1ワードごとにストロークの値を0に戻す、ランダムノイズの値を書き直す、lを初期化する
+            ###### reset stroke value to 0 for each word, rewrite random noise value, initialize l
+
             for i, w in enumerate(a):
                 st = 0
                 xn = random.gauss(0, 0.001)
@@ -129,12 +131,13 @@ class Augment:
                 # xn = random.uniform(-per, per)
                 # yn = random.uniform(-per, per)
                 l = []
-                # 1つのストロークには同じノイズを乗せる（平行移動）
+                # Put the same noise on one stroke (parallel movement)
+
                 for p in w:
-                    # 同じストローク
+                    # same stroke
                     if p[2] == st:
                         pass
-                    # ストロークが変わる際にノイズの値を書き直す
+                    # Rewrite noise values ​​when stroke changes
                     else:
                         xn = random.gauss(0, 0.001)
                         yn = random.gauss(0, 0.001)
@@ -145,7 +148,7 @@ class Augment:
                     p0 = p[0] + xn
                     p1 = p[1] + yn
 
-                    # x座標, y座標, ストローク
+                    # x coordinate, y coordinate, stroke
                     l.append([p0, p1, p[2]])
 
                 labels.append(label[i])
@@ -156,15 +159,18 @@ class Augment:
         del a, d, labels, l, xn, yn
 
     #####  genRotate  --> strokeRotate  --> pointRotate
-    # 点の回転
+    # point rotation
+
     def pointRotate(self, point, center, angle):
         # x, y = point
         # c_x, c_y = center
         rad = math.radians(angle)
-        # 点の回転用の行列
+        # matrix for point rotation
+
         mat = np.array([[math.cos(rad), -math.sin(rad)], [math.sin(rad), math.cos(rad)]])
         xy = np.array([point[0]-center[0], point[1]-center[1]])
-        # 点の回転の式
+        # point rotation formula
+
         XY = np.dot(mat, xy)
         X = XY[0] + center[0]
         Y = XY[1] + center[1]
@@ -193,8 +199,10 @@ class Augment:
         l = []
         cal = 0
         for k in tqdm(range(num)):
-            # ワードごとにストロークカウンタを1に
-            # ワードごとにcを空に
+            # Set stroke counter to 1 per word
+
+            # Empty c for each word
+
             # a: [word,,,word]
             for j, w in enumerate(a):
                 st = 1
@@ -202,7 +210,8 @@ class Augment:
                 # w: [[x,y,st],,,[x,y,st]]
                 # i: index, p: [x,y,st]
                 for i, p in enumerate(w):
-                    # ワードの最後の点なら追加してrotate
+                    # If the last point in the word, add and rotate
+
                     if i+1 == len(w):
                         l.append(p)
                         st += 1
@@ -215,7 +224,8 @@ class Augment:
                         newl = self.strokeRotate(l, dispersion)
                         c.extend(newl)
                         l = []
-                    # 終点でなければそのまま追加
+                    # If it is not the end point, add it as it is
+
                     elif w[i+1][2] != st:
                         l.append(p)
                 labels.append(label[j])
@@ -225,15 +235,15 @@ class Augment:
         del a, labels, d, l, c, st
 
 
-    # 風の比率変換プログラム
+    # wind ratio conversion program
     def genRatio(self, data, label, num, ratio):
         print("data augmentation(XYratio)")
         a = np.array(data)
         d = []
         labels = []
-        # 拡張の倍率だけ繰り返す
+        # Repeat by the magnification of expansion
         for j in tqdm(range(num)):
-            ##### 1ワードごとに乱数を戻す #####
+            ##### Returns a random number for each word #####
             # i : index,  w : word (0(x),1(y),2(stroke))
             for i, w in enumerate(a):
                 l = []
@@ -243,7 +253,7 @@ class Augment:
                 ran = random.randint(0,2)
 
                 for p in w:
-                    # X方向での拡張(1)
+                    # Expansion in X direction(1)
                     if ran == 0:
                         if p[0] >= Mean[0]:
                             p0 = p[0] + p[0]*ratio[j]
@@ -251,7 +261,7 @@ class Augment:
                             p0 = p[0] - p[0]*ratio[j]
 
                         p1 = p[1]
-                    # Y方向での拡張(2)
+                    # Expansion in Y direction(2)
                     else:
                         if p[1] >= Mean[1]:
                             p1 = p[1] + p[1]*ratio[j]
@@ -260,7 +270,7 @@ class Augment:
 
                         p0 = p[0]
 
-                    # x座標, y座標, ストローク
+                    #x coordinate, y coordinate, stroke
                     l.append([p0, p1, p[2]])
 
                 labels.append(label[i])
@@ -270,19 +280,19 @@ class Augment:
         self.labels = labels
         del a, l, d, labels, ratio, ran, p0, p1, Mean
 
-    # 画像変換では使用できない
+    # Not available for image conversion
     def pointToLine(self, data):
         print("converting points to lines")
         l = []
         for c in tqdm(data):
             a = []
             for i in range(len(c) - 1):
-                x = c[i][0] # 線の始点のx座標
-                y = c[i][1] # 線の始点のy座標
-                dx = c[i+1][0] - c[i][0] # 2点間のx軸の距離
-                dy = c[i+1][1] - c[i][1] # 2点間のy軸の距離
-                sst = int(c[i][2] == c[i+1][2]) # 同じストロークか
-                dst = int(c[i][2] != c[i+1][2]) # 異なるストロークか
+                x = c[i][0] # the x-coordinate of the starting point of the line
+                y = c[i][1] # the y-coordinate of the starting point of the line
+                dx = c[i+1][0] - c[i][0] # 2x-axis distance between points
+                dy = c[i+1][1] - c[i][1] # 2y-axis distance between points
+                sst = int(c[i][2] == c[i+1][2]) # the same stroke
+                dst = int(c[i][2] != c[i+1][2]) # different strokes
                 line = np.array([x, y, dx, dy, sst, dst])
                 a.append(line)
             a = np.array(a)
@@ -290,7 +300,7 @@ class Augment:
         self.dataset = np.array(l)
         print("done converting points to lines")
 
-    # 拡張後の座標データを画像に変換する
+    # Convert the expanded coordinate data to an image
     def Chara_img(self, data, label, type):
         # data = [[word],,,[word]]
         # word = [[x, y, s],,,[x, y, s]]
@@ -301,12 +311,12 @@ class Augment:
 
         for i in range(4):
             ran = random.randint(0, len(data))
-            word = data[ran] #出力単語の決定
+            word = data[ran] #Determining output words
             a = np.array(word)
             st = 0
             d = []
             l = []
-            # ストロークごとに線を分ける
+            # Separate lines for each stroke
             for index, p in enumerate(a):
                 if p[2] == st:
                     # l = [[x,y,st],,,[x,y,st]]
@@ -341,7 +351,7 @@ class Augment:
 
     def runThis(self, augment_mode=0, check_character=None, now=None):
         if check_character is None:
-            # TestデータとTrainデータを分ける
+            # Testdata and Train split the data
             self.split(user_list)
             with open("./data/all/test_data.txt", "wb") as fp:   #Pickling
                 pickle.dump(self.testX, fp)
@@ -357,7 +367,7 @@ class Augment:
                 if self.Ratio_num > 0:
                     self.genRatio(self.dataset, self.labels, num=self.Ratio_num, ratio=self.ratio)
                     gc.collect()
-        # 画像取得
+        # image acquisition
         else:
             self.Chara_img(self.dataset, self.labels, type="NoAug:" + str(now))
             if self.Rotate_num > 0:

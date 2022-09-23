@@ -19,37 +19,37 @@ class Preprocess:
         self.position = position
         self.dataset = []
 
-    # クラス内の変数にデータを格納
+    # Store data in variables in classes
     def importJson(self,lan):
         print("importing data...")
         a = open('./data/export.json')
         b = json.load(a)
         samples = b["medical-samples"]
 
-        # 全単語取得
+        # Get all words
         if lan == "all":
             for x in range(len(samples)):
                 if not samples[x] is None:
-                    # lower() →　全て小文字にする
+                    # lower() → Lowercase all
                     uid = samples[x]["userId"].lower()
                     for p in self.position:
-                        # startswith: 文字列の最初が一致するか判定する
+                        # startswith: Determine if the beginning of the string matches
                         if uid.startswith('user_' + p.lower()):
                             self.inks.append(samples[x]["data"]["request"]["inks"])
                             self.words.append(samples[x]["word"])
                             self.urls.append(samples[x]["imageUrl"])
                             self.uid.append(uid)
                             break
-        # 英語 or バングラ語のみ
+        # English or Bangla only
         else:
             for x in range(len(samples)):
                 if not samples[x] is None:
-                    # lower() →　全て小文字にする
+                    # lower() → Lowercase all
                     uid = samples[x]["userId"].lower()
                     for p in self.position:
-                        # startswith: 文字列の最初が一致するか判定する
+                        # startswith: Determine if the beginning of the string matches
                         if uid.startswith('user_' + p.lower()):
-                            # 言語判定
+                            # Language judgment
                             if lan == samples[x]["data"]["request"]["language"]:
                                 self.inks.append(samples[x]["data"]["request"]["inks"])
                                 self.words.append(samples[x]["word"])
@@ -60,47 +60,47 @@ class Preprocess:
                                 pass
         print("done importing data")
 
-    # imgUrlから写真を取ってくる
+    # fetch photo from imgUrl
     def download_img(self, url, file_name):
         r = requests.get(url, stream=True)
         if r.status_code == 200:
             with open(file_name, 'wb') as f:
                 f.write(r.content)
 
-    # listをバイナリ化してテキストデータで保存
+    # Binary the list and save it as text data
     def saveLists(self, d, name):
         with open("./data/all/" + name + ".txt", "wb") as fp:   #Pickling
             pickle.dump(d, fp)
 
 
-    # それぞれの変数をtxtファイルに保存
+    # Save each variable to a txt file
     def preprocess(self, lan):
-        # ラベル付をするために使用
+        # used for labeling
         self.saveLists(self.inks, lan + "_inks")
         self.saveLists(self.words,lan + "_words")
         self.saveLists(self.urls, lan + "_urls")
         self.saveLists(self.uid, lan + "_uid")
 
-    # ストローク番号を追加する関数
+    # Function to add stroke number
     def stroke(self):
         for y in range(len(self.inks)):
             for x in range(len(self.inks[y])):
                 self.inks[y][x].append([x] * len(self.inks[y][x][0]))
 
-    #　ストロークをつなげて転置
+    #Connect Strokes and Transpose
     def strokeConnect(self):
         print("connecting strokes")
-        for y in range(len(self.inks)): # 1文字ごとの作業
+        for y in range(len(self.inks)): # Work character by character
             f = self.inks[y][0]
             f = np.array(f).T
-            for x in range(len(self.inks[y]) - 1): # 1ストロークごとの作業
+            for x in range(len(self.inks[y]) - 1): # Work per stroke
                 e = self.inks[y][x+1]
                 e = np.array(e).T
                 f = np.append(f, e, axis = 0)
             self.dataset.append(f)
         print("done connecting strokes")
 
-    # 時間情報を削除
+    # Remove time information
     def removeTime(self):
         b = []
         for x in range(len(self.dataset)):
@@ -110,7 +110,7 @@ class Preprocess:
             b.append(a)
         self.dataset = b
 
-    # 近接する点の除去
+    # Remove Nearby Points
     def listClosePoint(self):
         print("removing extra points")
         l = []
@@ -118,10 +118,10 @@ class Preprocess:
             a = []
             for i in range(len(c)):
                 if i == 0 or i+1 == len(c):
-                    # 文字の最初のポイントと最後のポイントはそのまま残す
+                    # leave the first and last points of the character intact
                     a.append(c[i])
                 elif c[i-1][2] != c[i][2] or c[i][2] != c[i+1][2]:
-                    # ストロークの最初のポイントと最後のポイントはそのまま残す
+                    # Leave the first and last points of the stroke intact
                     a.append(c[i])
                 else:
                     dp = math.sqrt((c[i][0]-c[i-1][0])**2 + (c[i][1]-c[i-1][1])**2)
@@ -131,17 +131,17 @@ class Preprocess:
                 l.append(a)
         self.dataset = l
 
-    # 直線上の点の除去
+    # Removing Points on Lines
     def listStraightPoint(self):
         l = []
         for c in self.dataset:
             a = []
             for i in range(len(c)):
                 if i == 0 or i+1 == len(c):
-                    # 文字の最初のポイントと最後のポイントはそのまま残す
+                    # leave the first and last points of the character intact
                     a.append(c[i])
                 elif c[i-1][2] != c[i][2] or c[i][2] != c[i+1][2]:
-                    # ストロークの最初のポイントと最後のポイントはそのまま残す
+                    # Leave the first and last points of the stroke intact
                     a.append(c[i])
                 else:
                     dx0 = c[i][0] - c[i-1][0] # deltaX(i-1)
@@ -157,7 +157,7 @@ class Preprocess:
         self.dataset = l
         print("done removing extra points")
 
-    # 正規化　min-max
+    # Normalization min-max
     def normalization(self, lan):
         print("normalization")
         a = self.dataset[0]
@@ -179,19 +179,19 @@ class Preprocess:
         self.saveLists(self.dataset, lan + "_pped_data")
         print("done normalization")
 
-    # 点を線に変換する
+    # convert points to lines
     def pointToLine(self):
         print("converting points to lines")
         l = []
         for c in self.dataset:
             a = []
             for i in range(len(c) - 1):
-                    x = c[i][0] # 線の始点のx座標
-                    y = c[i][1] # 線の始点のy座標
-                    dx = c[i+1][0] - c[i][0] # 2点間のx軸の距離
-                    dy = c[i+1][1] - c[i][1] # 2点間のy軸の距離
-                    sst = int(c[i][2] == c[i+1][2]) # 同じストロークか
-                    dst = int(c[i][2] != c[i+1][2]) # 異なるストロークか
+                    x = c[i][0] # the x-coordinate of the starting point of the line
+                    y = c[i][1] # the y-coordinate of the starting point of the line
+                    dx = c[i+1][0] - c[i][0] # x-axis distance between two points
+                    dy = c[i+1][1] - c[i][1] # y-axis distance between two points
+                    sst = int(c[i][2] == c[i+1][2]) # the same stroke
+                    dst = int(c[i][2] != c[i+1][2]) # different strokes
                     line = [x, y, dx, dy, sst, dst]
                     a.append(line)
             l.append(a)
@@ -224,7 +224,7 @@ def preprocess_main(lan):
     pp.removeTime()
     pp.listStraightPoint()
     pp.listClosePoint()
-    # 画像用も正規化を行うことに決定
+    # Decided to do normalization for images too
     pp.normalization(lan)
     print("done preprocessing")
 

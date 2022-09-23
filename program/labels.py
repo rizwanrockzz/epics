@@ -11,23 +11,23 @@ class Label_gen:
         self.words = []
         self.labels = []
         self.position = position
-        self.num_words = 480 # 認識する用語の数
+        self.num_words = 480 # number of terms to recognize
 
-    # 単語データを取ってくる
+    # get word data
     def getList(self):
         text_file = open("./data/dataList.txt", "r")
         a = text_file.read().split('\n')
-        # 最後の空白も読んじゃうのでスライスで消す
+        # The last blank is also read, so delete it with a slice
         self.corpus = a[0:self.num_words]
         text_file.close()
 
-    # jsonからとってきた正解データを取ってくる
+    # Fetch correct data taken from json
     def getData(self, lan):
         f = open("./data/all/" + lan + "_words.txt", "rb")
         self.words = pickle.load(f)
         f.close()
 
-    # ラベルデータ作成
+    # Create label data
     def toBinary(self, lan):
         idx = []
         for w in self.words:
@@ -39,7 +39,7 @@ class Label_gen:
         labels = []
         for x in idx:
             b = np.zeros((self.num_words,), dtype=int)
-            # 実験に含みたくないデータはlabelに-1を入れる
+            # Put -1 in the label for data that you do not want to include in the experiment
             if x is None:
                 b[0] = -1
             else:
@@ -78,7 +78,7 @@ class Label_gen:
 # label_type = ["0","learning","image-title"]
 def labels_main(lan, label_type):
     lg = Label_gen()
-    # 正解データ取得（480単語）
+    # Correct answer data acquisition (480 words)
     lg.getList()
     lg.getData(lan)
     if label_type == "learning":

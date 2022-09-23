@@ -60,13 +60,13 @@ class Learning:
         model = Model(inputs=_input, outputs=predictions)
         if optName.lower() == "adam":
             opt = Adam(lr=lr)
-            #lr = 0.001がデフォルト
+            #lr = 0.001 is default
         elif optName.lower() == "sgd":
             opt = SGD(lr=lr)
-            #lr = 0.01がデフォルト
+            #lr = 0.01 is the default
         elif optName.lower() == "rmsprop":
             opt = RMSprop(lr=lr)
-            #lr = 0.001がデフォルト
+            #lr = 0.001 is the default
         model.compile(loss='categorical_crossentropy',
                       optimizer=opt,
                       metrics=['accuracy'])
@@ -89,7 +89,7 @@ class Learning:
             fp.write("Date  : " + str(self.dt)+"\n")
             fp.write('Test loss:' + str(loss) + ' Test accuracy:' + str(accuracy)+"\n")
 
-        print('show 学習曲線')
+        print('show learning curve')
         fig, (axL, axR) = plt.subplots(ncols=2, figsize=(10,4))
         self.plot_history_loss(fig, axL, axR)
         self.plot_history_acc(fig, axL, axR)
@@ -115,10 +115,10 @@ class Learning:
         axR.legend(loc='upper right')
 
     def runThis(self):
-        # 学習用のデータの形を整える
+        # Shaping data for training
         self.maxlen = max([len(self.data[i]) for i in range(len(self.data))])
         self.data = self.padding(self.data)
-        # 評価用データの形を整える
+        # Formatting data for evaluation
         self.testX = self.padding(self.testX)
 
 # ---------------------------------------------------------------------------
