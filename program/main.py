@@ -8,9 +8,8 @@ import pickle
 import sys
 import numpy as np
 import tensorflow as tf
-from keras.backend import *
-# from keras.backend import tensorflow_backend
-
+from keras.backend import backend
+# from tf.compat.v1.keras.backend import set_session
 import gc
 
 
@@ -18,7 +17,7 @@ def cleanGpu():
     # GPU Needed to avoid using up memory
     config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True))
     session = tf.Session(config=config)
-    tensorflow_backend.set_session(session)
+    backend.set_session(session)
 
 # -----------------------------------------------------
 # read write For
@@ -29,23 +28,23 @@ def cleanGpu():
 def read_log(i):
     print("【Previous execution record】")
     if i == 0:
-        with open("./data/all/Kaze/log/log.txt", "r") as f:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\log.txt", "r") as f:
             s = f.read()
             print(s)
     elif i == 1:
-        with open("./data/all/Kaze/log/main_acc.txt", "r") as f:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\main_acc.txt", "r") as f:
             s = f.read()
             print(s)
     elif i == 2:
-        with open("./data/all/Kaze/log/parameter.txt", "r") as f:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\parameter.txt", "r") as f:
             s = f.read()
             print(s)
     elif i == 3:
-        with open("./data/all/Kaze/log/img.txt", "r") as f:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\img.txt", "r") as f:
             s = f.read()
             print(s)
     elif i == 4:
-        with open("./data/all/Kaze/log/pp_label.txt", "r") as f:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\pp_label.txt", "r") as f:
             s = f.read()
             print(s)
 
@@ -57,17 +56,17 @@ def write_log(i, text):
     text = dt + text
 
     if i == 0:
-        with open("./data/all/Kaze/log/log.txt", "a") as f:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\log.txt", "a") as f:
             f.write(text + "\n")
     elif i == 1:
         print("Learning Already filled in")
     elif i == 2:
         print("Learning Already filled in")
     elif i == 3:
-        with open("./data/all/Kaze/log/img.txt", "a") as f:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\img.txt", "a") as f:
             f.write(text + "\n")
     elif i == 4:
-        with open("./data/all/Kaze/log/pp_label.txt", "a") as f:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\pp_label.txt", "a") as f:
             f.write(text + "\n")
 
 
@@ -82,39 +81,39 @@ def delete(i, text):
     # f3 : Write a new to f
 
     if i == 5:
-        with open("./data/all/Kaze/log/log.txt", "r") as f:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\log.txt", "r") as f:
             s = f.read()
-        with open("./data/all/Kaze/log/log-data.txt", "a") as f2:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\log-data.txt", "a") as f2:
             f2.write(s)
-        with open("./data/all/Kaze/log/log.txt", "w") as f3:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\log.txt", "w") as f3:
             f3.write(text)
     elif i == 1:
-        with open("./data/all/Kaze/log/main_acc.txt", "r") as f:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\main_acc.txt", "r") as f:
             s = f.read()
-        with open("./data/all/Kaze/log/main_acc-data.txt", "a") as f2:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\main_acc-data.txt", "a") as f2:
             f2.write(s)
-        with open("./data/all/Kaze/log/main_acc.txt", "w") as f3:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\main_acc.txt", "w") as f3:
             f3.write(text)
     elif i == 2:
-        with open("./data/all/Kaze/log/parameter.txt", "r") as f:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\parameter.txt", "r") as f:
             s = f.read()
-        with open("./data/all/Kaze/log/parameter-data.txt", "a") as f2:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\parameter-data.txt", "a") as f2:
             f2.write(s)
-        with open("./data/all/Kaze/log/parameter.txt", "w") as f3:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\parameter.txt", "w") as f3:
             f3.write(text)
     elif i == 3:
-        with open("./data/all/Kaze/log/img.txt", "r") as f:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\img.txt", "r") as f:
             s = f.read()
-        with open("./data/all/Kaze/log/img-data.txt", "a") as f2:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\img-data.txt", "a") as f2:
             f2.write(s)
-        with open("./data/all/Kaze/log/img.txt", "w") as f3:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\img.txt", "w") as f3:
             f3.write(text)
     elif i == 4:
-        with open("./data/all/Kaze/log/pp_label.txt", "r") as f:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\pp_label.txt", "r") as f:
             s = f.read()
-        with open("./data/all/Kaze/log/pp_label-data.txt", "a") as f2:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\pp_label-data.txt", "a") as f2:
             f2.write(s)
-        with open("./data/all/Kaze/log/pp_label.txt", "w") as f3:
+        with open(r"D:\epics\datasets\program\data\all\Kaze\log\pp_label.txt", "w") as f3:
             f3.write(text)
 # ----------------------------------------------------------
 # Input functions
